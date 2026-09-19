@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>POKEDEX</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="This is a POKEDEX application. It is for the purpose different pokemon and it's specifications.">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
+        </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous">
+        </script>
+    <script src="./dist/script.js"></script>
+    <link rel="stylesheet" href="./dist/css/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row row-title">
+            <header class="header-title">Pokédex | </header><span class="header-sub-content">Search for any Pokémon that
+                exists on planet</span>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-sm-12 col-xs-12 col-md-4">
+                <label class="label-text" for="filterInput">Search by</label>
+                <div class="input-group">
+                    <input class="form-control" id="filterInput" onkeyup="filterData(event)"
+                        placeholder="Name or Number">
+                    <div class="input-group-append">
+                        <span class="input-group-text">
+                            <em class="fa fa-search"></em>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-12 col-xs-12 col-md-4">
+                <div class="form-group">
+                    <label class="label-text">Type</label>
+                    <select class="form-control" id="pokemonType" onchange="filterType(event)"></select>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="listingData"></div>
+        <!-- Modal -->
+        <div class="modal" id="exampleModal" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog">
+                <div class="modal-content detail-modal">
+                    <div class="modal-header">
+                        <h4 class="detail-title" id="pokemonName"></h4>
+                        <h4 class="detail-title pl-2 pr-2">|</h4>
+                        <h4 class="id-detail-title" id="pokemonId"></h4>
+                        <button type="button" class="close modal-close" data-dismiss="modal"><span
+                                aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-xs-12 col-sm-12 text-center">
+                                <img id="pokemonImg" class="pokemon-image image-card" alt="No pokemon image">
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-xs-12 col-sm-12"><span class="pokemon-desc"
+                                    id="pokemonDesc"></span><a data-toggle="popover" class="read-link"
+                                    data-placement="bottom" id="actualData">...read more</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+    <script>
+        $('#exampleModal').on('show.bs.modal', function (e) {
+            let pokemonId = $(e.relatedTarget).data('pokemon-id');
+            let pokemonName = $(e.relatedTarget).data('pokemon-name');
+            let pokemonImg = $(e.relatedTarget).data('pokemon-img');
+            let pokemonType = $(e.relatedTarget).data('pokemon-type');
+            let actualId = $(e.relatedTarget).data('actual-id');
+            document.getElementById('pokemonId').innerHTML = pokemonId;
+            document.getElementById('pokemonName').innerHTML = pokemonName;
+            document.querySelector("#pokemonImg").setAttribute("src", pokemonImg);
+            const cardGradient = document.querySelector(".image-card");
+            cardGradient.style.background = getGradient(JSON.parse(JSON.stringify(pokemonType)));
+            fetch(`https://pokeapi.co/api/v2/pokemon-species/${actualId}`).then(res => {
+                return res.json();
+            }).then(data => {
+                let flavorText = [];
+                data.flavor_text_entries.forEach(element => {
+                    if (element.language.name === 'en') {
+                        flavorText.push(element.flavor_text);
+                    }
+                });
+                let text = flavorText.filter((data, i) => {
+                    return flavorText.indexOf(data) === i;
+                });
+                document.getElementById('pokemonDesc').innerHTML = text.toString().substring(0, 200);
+                document.querySelector("#actualData").setAttribute("data-content", text.toString());
+            })
+        });
+    </script>
+</body>
+
+</html>
